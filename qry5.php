@@ -356,6 +356,11 @@ class QRYliteral extends QRYelem {
 		return $this->val;
 	}
 
+	/* 3 out-of-place methods to work as part of QRYmatchset */
+	public function setOrder($str) { $this->val .= ' ' . $str; }
+	public function asName() { return $this->val; }
+	public function asOrder() { return ''; }
+
 }
 
 class QRYmatch extends QRYelem {
@@ -749,6 +754,16 @@ class QRY {
 		if ($settype) {
 			$fieldset = $this->lastSet($settype);
 			if (!$fieldset) $fieldset = $this->add_SET($settype);
+		}
+
+		/* Hack -- if there are funky characters in the field name,
+		 * treat it as literal */
+		if (preg_match('#\(|\)#', $field_name)) {
+			$field = new QRYliteral($field_name);//for this hack to work we added 3 methods to QRYliterl,see it
+			$fieldset->add($field);
+			//$left_ptr = $this->add_FIELD($field_name, null, null, $fieldset);
+			//if ($fieldset == NULL) return $left_ptr;
+			return $fieldset;
 		}
 
 		/* Add new field with those paramaters */
